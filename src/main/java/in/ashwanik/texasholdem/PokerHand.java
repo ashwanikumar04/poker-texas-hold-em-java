@@ -1,11 +1,27 @@
 package in.ashwanik.texasholdem;
 
 
+import in.ashwanik.texasholdem.ranks.*;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-class PokerHand {
+import static java.util.stream.Collectors.groupingBy;
+
+public class PokerHand {
+
+    private static Rank STRAIGHT_FLUSH = new StraightFlushCardRank();
+    private static Rank FOUR_OF_A_KIND = new FourOfAKindRank();
+    private static Rank FULL_HOUSE = new FullHouseRank();
+    private static Rank FLUSH = new FlushCardRank();
+    private static Rank STRAIGHT = new StraightCardRank();
+    private static Rank THREE_OF_A_KIND = new ThreeOfAKindRank();
+    private static Rank TWO_PAIR = new TwoPairRank();
+    private static Rank ONE_PAIR = new OnePairRank();
+    private static Rank HIGH_CARD = new HighCardRank();
+
+
     private List<Card> cards;
 
     PokerHand(String handString) {
@@ -17,18 +33,89 @@ class PokerHand {
         cards.sort(Comparator.comparingInt(o -> o.value));
     }
 
-    List<Card> getCards() {
+    public List<Card> getCards() {
         return cards;
     }
 
     Result compareWith(PokerHand other) {
-        StraightFlushHandler straightFlushHandler = new StraightFlushHandler();
-        return straightFlushHandler.handle(this, other);
+
+        Rank current = rank();
+        Rank others = other.rank();
+
+        if (current.getRank() > others.getRank()) {
+            return Result.WIN;
+        } else if (current.getRank() < others.getRank()) {
+            return Result.LOSS;
+        } else {
+            return current.resolveConflict(this, other);
+        }
     }
+
+    Rank rank() {
+        if (isStraightFlush()) {
+            return STRAIGHT_FLUSH;
+        } else if (isFourOfAKind()) {
+            return FOUR_OF_A_KIND;
+        } else if (isFullHouse()) {
+            return FULL_HOUSE;
+        } else if (isFlush()) {
+            return FLUSH;
+        } else if (isStraight()) {
+            return STRAIGHT;
+        } else if (isThreeOfAKind()) {
+            return THREE_OF_A_KIND;
+        } else if (isTwoPair()) {
+            return TWO_PAIR;
+        } else if (isOnePair()) {
+            return ONE_PAIR;
+        } else {
+            return HIGH_CARD;
+        }
+    }
+
+    private boolean isOnePair() {
+        return Helpers.getCountOfGroupOfASize(this.cards, 2) == 1;
+    }
+
+    private boolean isTwoPair() {
+        return Helpers.getCountOfGroupOfASize(this.cards, 2) == 2;
+    }
+
+    private boolean isThreeOfAKind() {
+        return Helpers.getCountOfGroupOfASize(this.cards, 3) == 1;
+    }
+
+    private boolean isFullHouse() {
+        return isThreeOfAKind() && isOnePair();
+    }
+
+    private boolean isFourOfAKind() {
+        return Helpers.getCountOfGroupOfASize(this.cards, 4) == 1;
+    }
+
+    private boolean isStraightFlush() {
+        return isStraight() && isFlush();
+    }
+
+
+    private boolean isStraight() {
+        boolean isIncreasing = true;
+        for (int index = 0; index < this.getCards().size() - 1; index++) {
+            if (Math.abs(this.getCards().get(index).getValue() - this.getCards().get(index + 1).getValue()) != 1) {
+                isIncreasing = false;
+            }
+        }
+        return isIncreasing;
+    }
+
+    private boolean isFlush() {
+        return this.getCards().stream().collect(groupingBy(PokerHand.Card::getSuit)).size() == 1;
+    }
+
 
     public enum Result {TIE, WIN, LOSS}
 
-    class Card {
+    public class Card {
         private int value;
         private char suit;
 

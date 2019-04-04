@@ -1,8 +1,6 @@
 package in.ashwanik.texasholdem;
 
 
-import in.ashwanik.texasholdem.ranks.*;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -11,18 +9,6 @@ import java.util.Map;
 import static java.util.stream.Collectors.groupingBy;
 
 public class PokerHand {
-
-    private static Rank STRAIGHT_FLUSH = new StraightFlushCardRank();
-    private static Rank FOUR_OF_A_KIND = new FourOfAKindRank();
-    private static Rank FULL_HOUSE = new FullHouseRank();
-    private static Rank FLUSH = new FlushCardRank();
-    private static Rank STRAIGHT = new StraightCardRank();
-    private static Rank THREE_OF_A_KIND = new ThreeOfAKindRank();
-    private static Rank TWO_PAIR = new TwoPairRank();
-    private static Rank ONE_PAIR = new OnePairRank();
-    private static Rank HIGH_CARD = new HighCardRank();
-
-
     private List<Card> cards;
     private Map<Integer, List<Card>> cardsMap;
 
@@ -36,18 +22,18 @@ public class PokerHand {
         cardsMap = Helpers.getValueMap(cards);
     }
 
-    public Map<Integer, List<Card>> getCardsMap() {
+    Map<Integer, List<Card>> getCardsMap() {
         return cardsMap;
     }
 
-    public List<Card> getCards() {
+    List<Card> getCards() {
         return cards;
     }
 
     Result compareWith(PokerHand other) {
 
-        Rank current = rank();
-        Rank others = other.rank();
+        Ranks current = rank();
+        Ranks others = other.rank();
 
         if (current.getRank() > others.getRank()) {
             return Result.WIN;
@@ -58,25 +44,25 @@ public class PokerHand {
         }
     }
 
-    Rank rank() {
+    Ranks rank() {
         if (isStraightFlush()) {
-            return STRAIGHT_FLUSH;
+            return Ranks.STRAIGHT_FLUSH;
         } else if (isFourOfAKind()) {
-            return FOUR_OF_A_KIND;
+            return Ranks.FOUR_OF_A_KIND;
         } else if (isFullHouse()) {
-            return FULL_HOUSE;
+            return Ranks.FULL_HOUSE;
         } else if (isFlush()) {
-            return FLUSH;
+            return Ranks.FLUSH;
         } else if (isStraight()) {
-            return STRAIGHT;
+            return Ranks.STRAIGHT;
         } else if (isThreeOfAKind()) {
-            return THREE_OF_A_KIND;
+            return Ranks.THREE_OF_A_KIND;
         } else if (isTwoPair()) {
-            return TWO_PAIR;
+            return Ranks.TWO_PAIR;
         } else if (isOnePair()) {
-            return ONE_PAIR;
+            return Ranks.ONE_PAIR;
         } else {
-            return HIGH_CARD;
+            return Ranks.HIGH_CARD;
         }
     }
 
@@ -121,6 +107,179 @@ public class PokerHand {
 
 
     public enum Result {TIE, WIN, LOSS}
+
+    public enum Ranks {
+
+        HIGH_CARD {
+            @Override
+            public int getRank() {
+                return 1;
+            }
+
+            @Override
+            public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
+                return Helpers.getHighCardResults(first.getCards(), second.getCards());
+            }
+        },
+        ONE_PAIR {
+            @Override
+            public int getRank() {
+                return 2;
+            }
+
+            @Override
+            public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
+                List<PokerHand.Card> firstCards = new ArrayList<>();
+                List<PokerHand.Card> secondCards = new ArrayList<>();
+
+                int firstPairValue = getHandDetails(first, firstCards);
+
+                int secondPairValue = getHandDetails(second, secondCards);
+
+                if (firstPairValue > secondPairValue) {
+                    return PokerHand.Result.WIN;
+                } else if (firstPairValue < secondPairValue) {
+                    return PokerHand.Result.LOSS;
+                } else {
+                    return Helpers.getHighCardResults(firstCards, secondCards);
+                }
+            }
+
+            private int getHandDetails(PokerHand hand, List<PokerHand.Card> cards) {
+                int value = 0;
+
+                for (Map.Entry<Integer, List<PokerHand.Card>> entry : hand.getCardsMap().entrySet()) {
+                    if (entry.getValue().size() == 1) {
+                        cards.addAll(entry.getValue());
+                    } else {
+                        value = entry.getKey();
+                    }
+                }
+                return value;
+            }
+        },
+        TWO_PAIR {
+            @Override
+            public int getRank() {
+                return 3;
+            }
+
+            @Override
+            public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
+
+                List<Integer> firstValues = new ArrayList<>(first.getCardsMap().keySet());
+                firstValues.sort(Comparator.reverseOrder());
+                List<Integer> secondValues = new ArrayList<>(second.getCardsMap().keySet());
+                secondValues.sort(Comparator.reverseOrder());
+                return Helpers.getHighCardResultsForValues(firstValues, secondValues);
+            }
+        },
+        THREE_OF_A_KIND {
+            @Override
+            public int getRank() {
+                return 4;
+            }
+
+            @Override
+            public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
+                return Helpers.getHighCardResults(first.getCards(), second.getCards());
+            }
+        },
+        STRAIGHT {
+            @Override
+            public int getRank() {
+                return 5;
+            }
+
+            @Override
+            public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
+                return Helpers.getHighCardResults(first.getCards(), second.getCards());
+            }
+        }, FLUSH {
+            @Override
+            public int getRank() {
+                return 6;
+            }
+
+            @Override
+            public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
+                return Helpers.getHighCardResults(first.getCards(), second.getCards());
+            }
+        }, FULL_HOUSE {
+            @Override
+            public int getRank() {
+                return 7;
+            }
+
+            @Override
+            public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
+                return Helpers.getHighCardResults(first.getCards(), second.getCards());
+            }
+        }, FOUR_OF_A_KIND {
+            @Override
+            public int getRank() {
+                return 8;
+            }
+
+            @Override
+            public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
+                return Helpers.getHighCardResults(first.getCards(), second.getCards());
+            }
+        }, STRAIGHT_FLUSH {
+            @Override
+            public int getRank() {
+                return 9;
+            }
+
+            @Override
+            public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
+                return Helpers.getHighCardResults(first.getCards(), second.getCards());
+            }
+        };
+
+
+        public abstract int getRank();
+
+        public abstract PokerHand.Result resolveConflict(PokerHand first, PokerHand second);
+    }
+
+    static class Helpers {
+
+        static PokerHand.Result getHighCardResults(List<PokerHand.Card> firstCardList, List<PokerHand.Card> secondCardList) {
+            int index = firstCardList.size() - 1;
+            while (index >= 0) {
+                if (firstCardList.get(index).getValue() > secondCardList.get(index).getValue()) {
+                    return PokerHand.Result.WIN;
+                } else if (firstCardList.get(index).getValue() < secondCardList.get(index).getValue()) {
+                    return PokerHand.Result.LOSS;
+                }
+                index--;
+            }
+            return PokerHand.Result.TIE;
+        }
+
+        static PokerHand.Result getHighCardResultsForValues(List<Integer> firstCardList, List<Integer> secondCardList) {
+            int index = firstCardList.size() - 1;
+            while (index >= 0) {
+                if (firstCardList.get(index) > secondCardList.get(index)) {
+                    return PokerHand.Result.WIN;
+                } else if (firstCardList.get(index) < secondCardList.get(index)) {
+                    return PokerHand.Result.LOSS;
+                }
+                index--;
+            }
+            return PokerHand.Result.TIE;
+        }
+
+        static Map<Integer, List<PokerHand.Card>> getValueMap(List<PokerHand.Card> cards) {
+            return cards.stream().collect(groupingBy(PokerHand.Card::getValue));
+        }
+
+        static int getCountOfGroupOfASize(Map<Integer, List<PokerHand.Card>> map, int groupSize) {
+            return (int) map.entrySet().stream().filter(x -> x.getValue().size() == groupSize).count();
+        }
+
+    }
 
     public class Card {
         private int value;
@@ -174,6 +333,5 @@ public class PokerHand {
             return cardValue;
         }
     }
-
 
 }

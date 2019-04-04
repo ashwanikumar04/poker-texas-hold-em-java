@@ -195,7 +195,8 @@ public class PokerHand {
             public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
                 return Helpers.getHighCardResults(first.getCards(), second.getCards());
             }
-        }, FLUSH {
+        },
+        FLUSH {
             @Override
             public int getRank() {
                 return 6;
@@ -205,7 +206,8 @@ public class PokerHand {
             public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
                 return Helpers.getHighCardResults(first.getCards(), second.getCards());
             }
-        }, FULL_HOUSE {
+        },
+        FULL_HOUSE {
             @Override
             public int getRank() {
                 return 7;
@@ -215,7 +217,8 @@ public class PokerHand {
             public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
                 return Helpers.getHighCardResults(first.getCards(), second.getCards());
             }
-        }, FOUR_OF_A_KIND {
+        },
+        FOUR_OF_A_KIND {
             @Override
             public int getRank() {
                 return 8;
@@ -225,7 +228,8 @@ public class PokerHand {
             public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
                 return Helpers.getHighCardResults(first.getCards(), second.getCards());
             }
-        }, STRAIGHT_FLUSH {
+        },
+        STRAIGHT_FLUSH {
             @Override
             public int getRank() {
                 return 9;

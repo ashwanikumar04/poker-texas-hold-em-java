@@ -17,32 +17,13 @@ public class OnePairRank implements Rank {
     @Override
     public PokerHand.Result resolveConflict(PokerHand first, PokerHand second) {
 
-        Map<Integer, List<PokerHand.Card>> firstCardMap = Helpers.getValueMap(first.getCards());
 
         List<PokerHand.Card> firstCards = new ArrayList<>();
-
-        int firstPairValue = 0;
-
-        for (Map.Entry<Integer, List<PokerHand.Card>> entry : firstCardMap.entrySet()) {
-            if (entry.getValue().size() == 1) {
-                firstCards.addAll(entry.getValue());
-            } else {
-                firstPairValue = entry.getKey();
-            }
-        }
-        int secondPairValue = 0;
-
-        Map<Integer, List<PokerHand.Card>> secondCardMap = Helpers.getValueMap(second.getCards());
-
         List<PokerHand.Card> secondCards = new ArrayList<>();
 
-        for (Map.Entry<Integer, List<PokerHand.Card>> entry : secondCardMap.entrySet()) {
-            if (entry.getValue().size() == 1) {
-                secondCards.addAll(entry.getValue());
-            } else {
-                secondPairValue = entry.getKey();
-            }
-        }
+        int firstPairValue = getHandDetails(first, firstCards);
+
+        int secondPairValue = getHandDetails(second, secondCards);
 
         if (firstPairValue > secondPairValue) {
             return PokerHand.Result.WIN;
@@ -51,5 +32,18 @@ public class OnePairRank implements Rank {
         } else {
             return Helpers.getHighCardResults(firstCards, secondCards);
         }
+    }
+
+    private int getHandDetails(PokerHand hand, List<PokerHand.Card> cards) {
+        int value = 0;
+
+        for (Map.Entry<Integer, List<PokerHand.Card>> entry : hand.getCardsMap().entrySet()) {
+            if (entry.getValue().size() == 1) {
+                cards.addAll(entry.getValue());
+            } else {
+                value = entry.getKey();
+            }
+        }
+        return value;
     }
 }

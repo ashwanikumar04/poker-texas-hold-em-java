@@ -6,6 +6,7 @@ import in.ashwanik.texasholdem.ranks.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -23,6 +24,7 @@ public class PokerHand {
 
 
     private List<Card> cards;
+    private Map<Integer, List<Card>> cardsMap;
 
     PokerHand(String handString) {
         cards = new ArrayList<>();
@@ -31,6 +33,11 @@ public class PokerHand {
             cards.add(new Card(card));
         }
         cards.sort(Comparator.comparingInt(o -> o.value));
+        cardsMap = Helpers.getValueMap(cards);
+    }
+
+    public Map<Integer, List<Card>> getCardsMap() {
+        return cardsMap;
     }
 
     public List<Card> getCards() {
@@ -74,15 +81,15 @@ public class PokerHand {
     }
 
     private boolean isOnePair() {
-        return Helpers.getCountOfGroupOfASize(this.cards, 2) == 1;
+        return Helpers.getCountOfGroupOfASize(this.cardsMap, 2) == 1;
     }
 
     private boolean isTwoPair() {
-        return Helpers.getCountOfGroupOfASize(this.cards, 2) == 2;
+        return Helpers.getCountOfGroupOfASize(this.cardsMap, 2) == 2;
     }
 
     private boolean isThreeOfAKind() {
-        return Helpers.getCountOfGroupOfASize(this.cards, 3) == 1;
+        return Helpers.getCountOfGroupOfASize(this.cardsMap, 3) == 1;
     }
 
     private boolean isFullHouse() {
@@ -90,7 +97,7 @@ public class PokerHand {
     }
 
     private boolean isFourOfAKind() {
-        return Helpers.getCountOfGroupOfASize(this.cards, 4) == 1;
+        return Helpers.getCountOfGroupOfASize(this.cardsMap, 4) == 1;
     }
 
     private boolean isStraightFlush() {

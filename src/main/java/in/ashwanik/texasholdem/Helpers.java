@@ -33,11 +33,12 @@ public class Helpers {
         return PokerHand.Result.TIE;
     }
 
-    public static Map<Integer, List<PokerHand.Card>> getValueMap(List<PokerHand.Card> cards) {
+    static Map<Integer, List<PokerHand.Card>> getValueMap(List<PokerHand.Card> cards) {
         return cards.stream().collect(groupingBy(PokerHand.Card::getValue));
     }
 
-    public static int getCountOfGroupOfASize(List<PokerHand.Card> cards, int groupSize) {
-        return (int) getValueMap(cards).entrySet().stream().filter(x -> x.getValue().size() == groupSize).count();
+    static int getCountOfGroupOfASize(Map<Integer, List<PokerHand.Card>> map, int groupSize) {
+        return (int) map.entrySet().stream().filter(x -> x.getValue().size() == groupSize).count();
     }
+
 }
